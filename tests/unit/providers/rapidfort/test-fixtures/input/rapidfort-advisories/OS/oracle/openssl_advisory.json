@@ -1,0 +1,26 @@
+{
+    "package_name": "openssl",
+    "advisory": {
+        "9": {
+            "CVE-2022-0778": {
+                "cve_id": "CVE-2022-0778",
+                "title": "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates",
+                "description": "The BN_mod_sqrt() function, which computes a modular square root, contains a bug that can cause it to loop forever for non-prime moduli.",
+                "severity": "HIGH",
+                "status": "fixed",
+                "events": [
+                    {
+                        "introduced": "0",
+                        "fixed": "1.1.1k-7.el8_5",
+                        "identifier": "ELSA-2022-1066"
+                    },
+                    {
+                        "introduced": "0",
+                        "fixed": "3.0.1-13.el9_0",
+                        "identifier": "ELSA-2022-1432"
+                    }
+                ]
+            }
+        }
+    }
+}

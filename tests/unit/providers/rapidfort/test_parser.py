@@ -208,6 +208,66 @@ class TestNormalize:
         ]
 
 
+    def test_oracle_events_keep_outer_os_version_and_per_range_identifier(
+        self, tmpdir, auto_fake_fixdate_finder
+    ):
+        ws = workspace.Workspace(tmpdir, "test", create=True)
+        parser = Parser(workspace=ws)
+
+        cve_map = {
+            "CVE-2022-0778": {
+                "cve_id": "CVE-2022-0778",
+                "description": "Test description",
+                "severity": "HIGH",
+                "events": [
+                    {"introduced": "0", "fixed": "1.1.1k-7.el8_5", "identifier": "ELSA-2022-1066"},
+                    {"introduced": "0", "fixed": "3.0.1-13.el9_0", "identifier": "ELSA-2022-1432"},
+                ],
+            },
+        }
+
+        with parser:
+            vuln_dict = parser._normalize("oracle", "9", "openssl", cve_map)
+
+        record = vuln_dict["CVE-2022-0778"]
+        assert record["Vulnerability"]["NamespaceName"] == "rapidfort-oracle:9"
+
+        fixed_in = sorted(
+            record["Vulnerability"]["FixedIn"],
+            key=lambda x: (x["Identifier"], x["Version"]),
+        )
+
+        assert len(fixed_in) == 2
+        assert fixed_in[0]["Identifier"] == "ELSA-2022-1066"
+        assert fixed_in[0]["NamespaceName"] == "rapidfort-oracle:9"
+        assert fixed_in[0]["VersionFormat"] == "rpm"
+        assert fixed_in[0]["Version"] == "1.1.1k-7.el8_5"
+        assert fixed_in[0]["VulnerableRange"] == ">= 0, < 1.1.1k-7.el8_5"
+        assert fixed_in[0]["VendorAdvisory"]["AdvisorySummary"] == [
+            {
+                "ID": "openssl",
+                "Link": "https://github.com/rapidfort/security-advisories/tree/main/OS/oracle/openssl.json",
+            },
+            {
+                "ID": "release-identifier:ELSA-2022-1066",
+                "Link": "https://github.com/rapidfort/security-advisories/tree/main/OS/oracle/openssl.json",
+            },
+        ]
+        assert fixed_in[1]["Identifier"] == "ELSA-2022-1432"
+        assert fixed_in[1]["Version"] == "3.0.1-13.el9_0"
+        assert fixed_in[1]["VulnerableRange"] == ">= 0, < 3.0.1-13.el9_0"
+        assert fixed_in[1]["VendorAdvisory"]["AdvisorySummary"] == [
+            {
+                "ID": "openssl",
+                "Link": "https://github.com/rapidfort/security-advisories/tree/main/OS/oracle/openssl.json",
+            },
+            {
+                "ID": "release-identifier:ELSA-2022-1432",
+                "Link": "https://github.com/rapidfort/security-advisories/tree/main/OS/oracle/openssl.json",
+            },
+        ]
+
+
 def test_provider_schema(helpers, disable_get_requests, monkeypatch, auto_fake_fixdate_finder):
     """Provider output must validate against schema-1.1.0.json."""
     ws = helpers.provider_workspace_helper(
