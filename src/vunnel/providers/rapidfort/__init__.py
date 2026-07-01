@@ -1,7 +1,7 @@
 """RapidFort security advisories provider.
 
 Ingests vulnerability data from the RapidFort security-advisories GitHub repo
-for Ubuntu, Debian, Alpine, and Red Hat. Used when scanning RapidFort-curated images (identified
+for Ubuntu and Alpine. Used when scanning RapidFort-curated images (identified
 via maintainer metadata) to apply RapidFort-specific advisory and version checks.
 """
 
